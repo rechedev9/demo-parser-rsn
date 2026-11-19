@@ -428,7 +428,7 @@ func (p *parser) bindNewPlayerPawn(pawnEntity st.Entity) {
 
 		controllerEntityID := int(controllerHandle & constants.EntityHandleIndexMaskSource2)
 		controllerEntity := p.gameState.playerControllerEntities[controllerEntityID]
-		// The controller can arrive after its pawn; a later update with the same handle binds it.
+		// The controller can arrive after its pawn; this pawn then stays unbound until m_hController changes.
 		if controllerEntity == nil {
 			return
 		}
