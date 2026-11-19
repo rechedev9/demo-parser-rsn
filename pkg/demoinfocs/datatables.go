@@ -362,8 +362,19 @@ func (p *parser) getOrCreatePlayerFromControllerEntity(controllerEntity st.Entit
 	return player
 }
 
+type pawnAwaitingController struct {
+	controllerEntityID int
+	bind               func()
+}
+
 func (p *parser) bindNewPlayerController(controllerEntity st.Entity) {
 	pl := p.getOrCreatePlayerFromControllerEntity(controllerEntity)
+
+	for _, pawn := range p.gameState.pawnsAwaitingController {
+		if pawn.controllerEntityID == controllerEntity.ID() {
+			pawn.bind()
+		}
+	}
 
 	onPropUpdate(controllerEntity, "m_iConnected", func(val st.PropertyValue) {
 		pl := p.getOrCreatePlayerFromControllerEntity(controllerEntity)
@@ -420,16 +431,22 @@ func (p *parser) bindNewPlayerPawn(pawnEntity st.Entity) {
 		return p.gameState.Participants().FindByHandle64(controllerProp.Handle())
 	}
 
-	onPropUpdate(pawnEntity, "m_hController", func(controllerHandleVal st.PropertyValue) {
-		controllerHandle := controllerHandleVal.Handle()
+	var bindController func(controllerHandle uint64)
+	bindController = func(controllerHandle uint64) {
+		delete(p.gameState.pawnsAwaitingController, pawnEntity.ID())
 		if controllerHandle == constants.InvalidEntityHandleSource2 || controllerHandle == prevControllerHandle {
 			return
 		}
 
 		controllerEntityID := int(controllerHandle & constants.EntityHandleIndexMaskSource2)
 		controllerEntity := p.gameState.playerControllerEntities[controllerEntityID]
-		// The controller can arrive after its pawn; this pawn then stays unbound until m_hController changes.
+		// The controller can be created after its pawn: bindNewPlayerController binds the pawn then.
 		if controllerEntity == nil {
+			p.gameState.pawnsAwaitingController[pawnEntity.ID()] = pawnAwaitingController{
+				controllerEntityID: controllerEntityID,
+				bind:               func() { bindController(controllerHandle) },
+			}
+
 			return
 		}
 
@@ -438,6 +455,14 @@ func (p *parser) bindNewPlayerPawn(pawnEntity st.Entity) {
 		pl := p.getOrCreatePlayerFromControllerEntity(controllerEntity)
 
 		p.bindPlayerWeapons(pawnEntity, pl)
+	}
+
+	onPropUpdate(pawnEntity, "m_hController", func(controllerHandleVal st.PropertyValue) {
+		bindController(controllerHandleVal.Handle())
+	})
+
+	pawnEntity.OnDestroy(func() {
+		delete(p.gameState.pawnsAwaitingController, pawnEntity.ID())
 	})
 
 	onPropUpdate(pawnEntity, "m_flFlashDuration", func(val st.PropertyValue) {

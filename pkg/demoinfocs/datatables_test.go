@@ -168,6 +168,8 @@ func TestBindNewPlayerPawn_ControllerNotKnownYet(t *testing.T) {
 	otherProp.On("OnUpdate", mock.Anything).Return()
 
 	pawn := new(stfake.Entity)
+	pawn.On("ID").Return(30)
+	pawn.On("OnDestroy", mock.Anything).Return()
 	pawn.On("Property", "m_hController").Return(ctlProp)
 	pawn.On("Property", mock.Anything).Return(otherProp)
 
@@ -176,4 +178,39 @@ func TestBindNewPlayerPawn_ControllerNotKnownYet(t *testing.T) {
 	assert.NotNil(t, onController)
 	assert.NotPanics(t, func() { onController(st.PropertyValue{Any: uint64(5)}) })
 	assert.Empty(t, p.gameState.playersByEntityID)
+}
+
+func TestBindNewPlayerPawn_ControllerCreatedAfterPawn(t *testing.T) {
+	p := newParser()
+
+	var onController st.PropertyUpdateHandler
+	ctlProp := new(stfake.Property)
+	ctlProp.On("OnUpdate", mock.Anything).Run(func(args mock.Arguments) {
+		onController = args.Get(0).(st.PropertyUpdateHandler)
+	})
+	weaponsBound := false
+	weaponsProp := new(stfake.Property)
+	weaponsProp.On("OnUpdate", mock.Anything).Run(func(mock.Arguments) { weaponsBound = true })
+	otherProp := new(stfake.Property)
+	otherProp.On("OnUpdate", mock.Anything).Return()
+
+	pawn := new(stfake.Entity)
+	pawn.On("ID").Return(30)
+	pawn.On("OnDestroy", mock.Anything).Return()
+	pawn.On("Property", "m_hController").Return(ctlProp)
+	pawn.On("Property", playerWeaponPrefixS2).Return(weaponsProp)
+	pawn.On("Property", mock.Anything).Return(otherProp)
+	pawn.On("PropertyValue", mock.Anything).Return(st.PropertyValue{}, false)
+
+	p.bindNewPlayerPawn(pawn)
+	onController(st.PropertyValue{Any: uint64(5)})
+	assert.False(t, weaponsBound)
+
+	controller := fakePlayerEntity(5)
+	controller.On("PropertyValue", mock.Anything).Return(st.PropertyValue{}, false)
+	p.bindNewPlayerController(controller)
+
+	assert.NotNil(t, p.gameState.playersByEntityID[5])
+	assert.True(t, weaponsBound)
+	assert.Empty(t, p.gameState.pawnsAwaitingController)
 }

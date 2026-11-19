@@ -24,6 +24,7 @@ type gameState struct {
 	playersByEntityID            map[int]*common.Player    // Maps entity-IDs to players
 	playersBySteamID32           map[uint32]*common.Player // Maps 32-bit-steam-IDs to players
 	playerControllerEntities     map[int]st.Entity
+	pawnsAwaitingController      map[int]pawnAwaitingController    // Maps pawn entity IDs to pawns whose controller was not created yet
 	grenadeProjectiles           map[int]*common.GrenadeProjectile // Maps entity-IDs to active nade-projectiles. That's grenades that have been thrown, but have not yet detonated.
 	infernos                     map[int]*common.Inferno           // Maps entity-IDs to active infernos.
 	weapons                      map[int]*common.Equipment         // Maps entity IDs to weapons. Used to remember what a weapon is (p250 / cz etc.)
@@ -225,6 +226,7 @@ func (gs gameState) EntityByHandle(handle uint64) st.Entity {
 func newGameState(demoInfo demoInfoProvider) *gameState {
 	gs := &gameState{
 		playerControllerEntities: make(map[int]st.Entity),
+		pawnsAwaitingController:  make(map[int]pawnAwaitingController),
 		playersByEntityID:        make(map[int]*common.Player),
 		playersByUserID:          make(map[int]*common.Player),
 		playersBySteamID32:       make(map[uint32]*common.Player),
