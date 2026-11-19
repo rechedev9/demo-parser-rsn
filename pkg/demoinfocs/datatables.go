@@ -57,46 +57,7 @@ func (p *parser) bindBomb() {
 		// Updated when a player starts/stops planting the bomb
 		bombEntity.Property("m_bStartedArming").OnUpdate(func(val st.PropertyValue) {
 			if val.BoolVal() {
-				planterHandle := bombEntity.PropertyValueMust("m_hOwnerEntity").Handle()
-				pawnEntity := p.gameState.entities[entityIDFromHandle(planterHandle)]
-				if pawnEntity == nil {
-					return
-				}
-
-				ctlHandle := pawnEntity.PropertyValueMust("m_hController").Handle()
-				ctlEntity := p.gameState.entities[entityIDFromHandle(ctlHandle)]
-				if ctlEntity == nil {
-					return
-				}
-
-				ctlID := ctlEntity.ID()
-				planter := p.gameState.playersByEntityID[ctlID]
-				if planter == nil {
-					return
-				}
-
-				planter.IsPlanting = true
-				p.gameState.currentPlanter = planter
-
-				siteNumber := p.gameState.currentPlanter.PlayerPawnEntity().PropertyValueMust("m_nWhichBombZone").Int()
-				site := events.BomsiteUnknown
-				switch siteNumber {
-				case 1:
-					site = events.BombsiteA
-				case 2:
-					site = events.BombsiteB
-				case 0:
-					site = p.getClosestBombsiteFromPosition(planter.Position())
-				}
-
-				if !p.disableMimicSource1GameEvents {
-					p.eventDispatcher.Dispatch(events.BombPlantBegin{
-						BombEvent: events.BombEvent{
-							Player: p.gameState.currentPlanter,
-							Site:   site,
-						},
-					})
-				}
+				p.bombStartedArming(bombEntity)
 			} else if p.gameState.currentPlanter != nil {
 				p.gameState.currentPlanter.IsPlanting = false
 				p.eventDispatcher.Dispatch(events.BombPlantAborted{Player: p.gameState.currentPlanter})
@@ -1304,6 +1265,48 @@ func (p *parser) bindHostages() {
 			}
 		})
 	})
+}
+
+func (p *parser) bombStartedArming(bombEntity st.Entity) {
+	planterHandle := bombEntity.PropertyValueMust("m_hOwnerEntity").Handle()
+	pawnEntity := p.gameState.entities[entityIDFromHandle(planterHandle)]
+	if pawnEntity == nil {
+		return
+	}
+
+	ctlHandle := pawnEntity.PropertyValueMust("m_hController").Handle()
+	ctlEntity := p.gameState.entities[entityIDFromHandle(ctlHandle)]
+	if ctlEntity == nil {
+		return
+	}
+
+	planter := p.gameState.playersByEntityID[ctlEntity.ID()]
+	if planter == nil {
+		return
+	}
+
+	planter.IsPlanting = true
+	p.gameState.currentPlanter = planter
+
+	// The controller's m_hPawn can name another pawn than the one holding the bomb, so read the planting pawn.
+	site := events.BomsiteUnknown
+	switch pawnEntity.PropertyValueMust("m_nWhichBombZone").Int() {
+	case 1:
+		site = events.BombsiteA
+	case 2:
+		site = events.BombsiteB
+	case 0:
+		site = p.getClosestBombsiteFromPosition(pawnEntity.Position())
+	}
+
+	if !p.disableMimicSource1GameEvents {
+		p.eventDispatcher.Dispatch(events.BombPlantBegin{
+			BombEvent: events.BombEvent{
+				Player: planter,
+				Site:   site,
+			},
+		})
+	}
 }
 
 func getDistanceBetweenVectors(vectorA r3.Vector, vectorB r3.Vector) float64 {

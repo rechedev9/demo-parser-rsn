@@ -8,6 +8,7 @@ import (
 	"github.com/stretchr/testify/mock"
 
 	common "github.com/markus-wa/demoinfocs-golang/v5/pkg/demoinfocs/common"
+	"github.com/markus-wa/demoinfocs-golang/v5/pkg/demoinfocs/constants"
 	events "github.com/markus-wa/demoinfocs-golang/v5/pkg/demoinfocs/events"
 	st "github.com/markus-wa/demoinfocs-golang/v5/pkg/demoinfocs/sendtables"
 	stfake "github.com/markus-wa/demoinfocs-golang/v5/pkg/demoinfocs/sendtables/fake"
@@ -123,4 +124,34 @@ func TestBindBomb_NilEntityChecks(t *testing.T) {
 		planter := p.gameState.playersByEntityID[20]
 		assert.Nil(t, planter, "planter should be nil when not in playersByEntityID map")
 	})
+}
+
+func TestBombStartedArming_ControllerPawnMismatch(t *testing.T) {
+	p := newParser()
+	p.bombsiteB = bombsite{center: r3.Vector{X: 100}}
+
+	bombEntity := new(stfake.Entity)
+	bombEntity.On("PropertyValueMust", "m_hOwnerEntity").Return(st.PropertyValue{Any: uint64(10)})
+
+	pawnEntity := new(stfake.Entity)
+	pawnEntity.On("PropertyValueMust", "m_hController").Return(st.PropertyValue{Any: uint64(20)})
+	pawnEntity.On("PropertyValueMust", "m_nWhichBombZone").Return(st.PropertyValue{Any: int32(0)})
+	pawnEntity.On("Position").Return(r3.Vector{X: 90})
+	p.gameState.entities[10] = pawnEntity
+
+	ctlEntity := new(stfake.Entity)
+	ctlEntity.On("ID").Return(20)
+	ctlEntity.On("PropertyValue", "m_hPawn").Return(st.PropertyValue{Any: uint64(constants.InvalidEntityHandleSource2)}, true)
+	p.gameState.entities[20] = ctlEntity
+
+	planter := &common.Player{Entity: ctlEntity}
+	p.gameState.playersByEntityID[20] = planter
+
+	var begin events.BombPlantBegin
+	p.RegisterEventHandler(func(e events.BombPlantBegin) { begin = e })
+
+	assert.NotPanics(t, func() { p.bombStartedArming(bombEntity) })
+	assert.True(t, planter.IsPlanting)
+	assert.Same(t, planter, begin.Player)
+	assert.Equal(t, events.BombsiteB, begin.Site)
 }
