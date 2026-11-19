@@ -5,7 +5,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	st "github.com/markus-wa/demoinfocs-golang/v5/pkg/demoinfocs/sendtables"
+	st "github.com/rechedev9/demo-parser-rsn/pkg/demoinfocs/sendtables"
 )
 
 func TestGetFloat_Nil(t *testing.T) {

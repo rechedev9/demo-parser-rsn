@@ -9,7 +9,7 @@ import (
 	"github.com/golang/geo/r3"
 	"github.com/markus-wa/quickhull-go/v2"
 
-	st "github.com/markus-wa/demoinfocs-golang/v5/pkg/demoinfocs/sendtables"
+	st "github.com/rechedev9/demo-parser-rsn/pkg/demoinfocs/sendtables"
 )
 
 // Inferno is a list of Fires with helper functions.
@@ -52,7 +52,7 @@ func (inf *Inferno) Thrower() *Player {
 		return inf.thrower
 	}
 
-	handleProp := inf.Entity.Property("m_hOwnerEntity").Value()
+	handleProp := st.ValueOrZero(inf.Entity, "m_hOwnerEntity")
 	return inf.demoInfoProvider.FindPlayerByPawnHandle(handleProp.Handle())
 }
 
@@ -61,7 +61,7 @@ func (inf *Inferno) Thrower() *Player {
 func (inf *Inferno) Fires() Fires {
 	entity := inf.Entity
 	origin := entity.Position()
-	nFires := entity.PropertyValueMust("m_fireCount").Int()
+	nFires := st.ValueOrZero(entity, "m_fireCount").Int()
 	fires := make([]Fire, 0, nFires)
 	iFormat := "%04d"
 
@@ -69,16 +69,16 @@ func (inf *Inferno) Fires() Fires {
 		iStr := fmt.Sprintf(iFormat, i)
 
 		fire := Fire{
-			IsBurning: entity.PropertyValueMust("m_bFireIsBurning." + iStr).BoolVal(),
+			IsBurning: st.ValueOrZero(entity, "m_bFireIsBurning."+iStr).BoolVal(),
 		}
 
 		if prop := entity.Property("m_firePositions." + iStr); prop != nil {
 			fire.Vector = prop.Value().R3Vec()
 		} else {
 			offset := r3.Vector{
-				X: float64(entity.PropertyValueMust("m_fireXDelta." + iStr).Int()),
-				Y: float64(entity.PropertyValueMust("m_fireYDelta." + iStr).Int()),
-				Z: float64(entity.PropertyValueMust("m_fireZDelta." + iStr).Int()),
+				X: float64(st.ValueOrZero(entity, "m_fireXDelta."+iStr).Int()),
+				Y: float64(st.ValueOrZero(entity, "m_fireYDelta."+iStr).Int()),
+				Z: float64(st.ValueOrZero(entity, "m_fireZDelta."+iStr).Int()),
 			}
 			fire.Vector = origin.Add(offset)
 		}

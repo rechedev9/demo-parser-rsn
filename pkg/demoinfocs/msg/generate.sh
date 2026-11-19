@@ -5,22 +5,22 @@
 
 protoc -Iproto \
        --go_out=. \
-       --go_opt=Mcstrike15_usermessages.proto=github.com/markus-wa/demoinfocs-golang/v5/pkg/demoinfocs/msg \
-       --go_opt=Mcstrike15_gcmessages.proto=github.com/markus-wa/demoinfocs-golang/v5/pkg/demoinfocs/msg \
-       --go_opt=Mengine_gcmessages.proto=github.com/markus-wa/demoinfocs-golang/v5/pkg/demoinfocs/msg \
-       --go_opt=Mnetmessages.proto=github.com/markus-wa/demoinfocs-golang/v5/pkg/demoinfocs/msg \
-       --go_opt=Msteammessages.proto=github.com/markus-wa/demoinfocs-golang/v5/pkg/demoinfocs/msg \
-       --go_opt=Mgcsdk_gcmessages.proto=github.com/markus-wa/demoinfocs-golang/v5/pkg/demoinfocs/msg \
-       --go_opt=Mnetworkbasetypes.proto=github.com/markus-wa/demoinfocs-golang/v5/pkg/demoinfocs/msg \
-       --go_opt=Mnetwork_connection.proto=github.com/markus-wa/demoinfocs-golang/v5/pkg/demoinfocs/msg \
-       --go_opt=Mdemo.proto=github.com/markus-wa/demoinfocs-golang/v5/pkg/demoinfocs/msg \
-       --go_opt=Mgameevents.proto=github.com/markus-wa/demoinfocs-golang/v5/pkg/demoinfocs/msg \
-       --go_opt=Musermessages.proto=github.com/markus-wa/demoinfocs-golang/v5/pkg/demoinfocs/msg \
-       --go_opt=Mcs_gameevents.proto=github.com/markus-wa/demoinfocs-golang/v5/pkg/demoinfocs/msg \
-       --go_opt=Mte.proto=github.com/markus-wa/demoinfocs-golang/v5/pkg/demoinfocs/msg \
-       --go_opt=Msource2_steam_stats.proto=github.com/markus-wa/demoinfocs-golang/v5/pkg/demoinfocs/msg \
-       --go_opt=Mvalveextensions.proto=github.com/markus-wa/demoinfocs-golang/v5/pkg/demoinfocs/msg \
-       --go_opt=module=github.com/markus-wa/demoinfocs-golang/v5/pkg/demoinfocs/msg \
+       --go_opt=Mcstrike15_usermessages.proto=github.com/rechedev9/demo-parser-rsn/pkg/demoinfocs/msg \
+       --go_opt=Mcstrike15_gcmessages.proto=github.com/rechedev9/demo-parser-rsn/pkg/demoinfocs/msg \
+       --go_opt=Mengine_gcmessages.proto=github.com/rechedev9/demo-parser-rsn/pkg/demoinfocs/msg \
+       --go_opt=Mnetmessages.proto=github.com/rechedev9/demo-parser-rsn/pkg/demoinfocs/msg \
+       --go_opt=Msteammessages.proto=github.com/rechedev9/demo-parser-rsn/pkg/demoinfocs/msg \
+       --go_opt=Mgcsdk_gcmessages.proto=github.com/rechedev9/demo-parser-rsn/pkg/demoinfocs/msg \
+       --go_opt=Mnetworkbasetypes.proto=github.com/rechedev9/demo-parser-rsn/pkg/demoinfocs/msg \
+       --go_opt=Mnetwork_connection.proto=github.com/rechedev9/demo-parser-rsn/pkg/demoinfocs/msg \
+       --go_opt=Mdemo.proto=github.com/rechedev9/demo-parser-rsn/pkg/demoinfocs/msg \
+       --go_opt=Mgameevents.proto=github.com/rechedev9/demo-parser-rsn/pkg/demoinfocs/msg \
+       --go_opt=Musermessages.proto=github.com/rechedev9/demo-parser-rsn/pkg/demoinfocs/msg \
+       --go_opt=Mcs_gameevents.proto=github.com/rechedev9/demo-parser-rsn/pkg/demoinfocs/msg \
+       --go_opt=Mte.proto=github.com/rechedev9/demo-parser-rsn/pkg/demoinfocs/msg \
+       --go_opt=Msource2_steam_stats.proto=github.com/rechedev9/demo-parser-rsn/pkg/demoinfocs/msg \
+       --go_opt=Mvalveextensions.proto=github.com/rechedev9/demo-parser-rsn/pkg/demoinfocs/msg \
+       --go_opt=module=github.com/rechedev9/demo-parser-rsn/pkg/demoinfocs/msg \
        cstrike15_gcmessages.proto \
        cstrike15_usermessages.proto \
        engine_gcmessages.proto \

@@ -7,10 +7,10 @@ import (
 	"text/tabwriter"
 	"time"
 
-	ex "github.com/markus-wa/demoinfocs-golang/v5/examples"
-	demoinfocs "github.com/markus-wa/demoinfocs-golang/v5/pkg/demoinfocs"
-	common "github.com/markus-wa/demoinfocs-golang/v5/pkg/demoinfocs/common"
-	events "github.com/markus-wa/demoinfocs-golang/v5/pkg/demoinfocs/events"
+	ex "github.com/rechedev9/demo-parser-rsn/examples"
+	demoinfocs "github.com/rechedev9/demo-parser-rsn/pkg/demoinfocs"
+	common "github.com/rechedev9/demo-parser-rsn/pkg/demoinfocs/common"
+	events "github.com/rechedev9/demo-parser-rsn/pkg/demoinfocs/events"
 )
 
 // Run like this: go run print_defuse_time_left.go -demo /path/to/demo.dem

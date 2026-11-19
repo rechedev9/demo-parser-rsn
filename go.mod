@@ -1,4 +1,4 @@
-module github.com/markus-wa/demoinfocs-golang/v5
+module github.com/rechedev9/demo-parser-rsn
 
 require (
 	github.com/andygrunwald/vdf v1.1.0

@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"os"
 
-	ex "github.com/markus-wa/demoinfocs-golang/v5/examples"
-	demoinfocs "github.com/markus-wa/demoinfocs-golang/v5/pkg/demoinfocs"
-	events "github.com/markus-wa/demoinfocs-golang/v5/pkg/demoinfocs/events"
+	ex "github.com/rechedev9/demo-parser-rsn/examples"
+	demoinfocs "github.com/rechedev9/demo-parser-rsn/pkg/demoinfocs"
+	events "github.com/rechedev9/demo-parser-rsn/pkg/demoinfocs/events"
 )
 
 // Run like this: go run viewmodel_settings.go -demo /path/to/cs2-demo.dem

@@ -5,7 +5,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/markus-wa/demoinfocs-golang/v5/examples"
+	"github.com/rechedev9/demo-parser-rsn/examples"
 )
 
 func TestGetMapMetadata(t *testing.T) {

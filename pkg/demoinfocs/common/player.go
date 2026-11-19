@@ -6,8 +6,8 @@ import (
 	"github.com/golang/geo/r3"
 	"github.com/pkg/errors"
 
-	"github.com/markus-wa/demoinfocs-golang/v5/pkg/demoinfocs/constants"
-	st "github.com/markus-wa/demoinfocs-golang/v5/pkg/demoinfocs/sendtables"
+	"github.com/rechedev9/demo-parser-rsn/pkg/demoinfocs/constants"
+	st "github.com/rechedev9/demo-parser-rsn/pkg/demoinfocs/sendtables"
 )
 
 // Player contains mostly game-relevant player information.
@@ -56,11 +56,11 @@ func (p *Player) PlayerPawnEntity() st.Entity {
 }
 
 func (p *Player) GetTeam() Team {
-	return Team(p.PlayerPawnEntity().PropertyValueMust("m_iTeamNum").UInt64())
+	return Team(st.ValueOrZero(p.PlayerPawnEntity(), "m_iTeamNum").UInt64())
 }
 
 func (p *Player) GetFlashDuration() float32 {
-	return p.PlayerPawnEntity().PropertyValueMust("m_flFlashDuration").Float()
+	return st.ValueOrZero(p.PlayerPawnEntity(), "m_flFlashDuration").Float()
 }
 
 // String returns the player's name.
@@ -87,7 +87,7 @@ func (p *Player) IsAlive() bool {
 
 	pawnEntity := p.PlayerPawnEntity()
 	if pawnEntity != nil {
-		return pawnEntity.PropertyValueMust("m_lifeState").UInt64() == 0
+		return st.ValueOrZero(pawnEntity, "m_lifeState").UInt64() == 0
 	}
 
 	return getBool(p.Entity, "m_bPawnIsAlive")
@@ -101,9 +101,12 @@ func (p *Player) IsBlinded() bool {
 
 // IsAirborne returns true if the player is jumping or falling.
 func (p *Player) IsAirborne() bool {
-	groundEntityHandle := getUInt64(p.PlayerPawnEntity(), "m_hGroundEntity")
+	ground := st.ValueOrZero(p.PlayerPawnEntity(), "m_hGroundEntity")
+	if ground.Any == nil {
+		return false
+	}
 
-	return groundEntityHandle == constants.InvalidEntityHandleSource2
+	return ground.Handle() == constants.InvalidEntityHandleSource2
 }
 
 // FlashDurationTime returns the duration of the blinding effect as time.Duration instead of float32 in seconds.
@@ -157,7 +160,7 @@ This isn't very conclusive but it looks like IsFlashed isn't super reliable curr
 // ActiveWeaponID is used internally to set the active weapon, see ActiveWeapon()
 func (p *Player) ActiveWeaponID() int {
 	if pawnEntity := p.PlayerPawnEntity(); pawnEntity != nil {
-		return int(pawnEntity.PropertyValueMust("m_pWeaponServices.m_hActiveWeapon").UInt64() & constants.EntityHandleIndexMaskSource2)
+		return int(st.ValueOrZero(pawnEntity, "m_pWeaponServices.m_hActiveWeapon").Handle() & constants.EntityHandleIndexMaskSource2)
 	}
 
 	return 0
@@ -199,7 +202,7 @@ func (p *Player) FlashbangCount() uint64 {
 // This is NOT "Line of Sight" / FOV - look up "CSGO TraceRay" for that.
 // May not behave as expected with multiple spotters.
 func (p *Player) IsSpottedBy(other *Player) bool {
-	if p.Entity == nil {
+	if p.Entity == nil || other == nil {
 		return false
 	}
 	pawnEntity := p.PlayerPawnEntity()
@@ -209,17 +212,14 @@ func (p *Player) IsSpottedBy(other *Player) bool {
 
 	clientSlot := other.EntityID - 1
 	bit := uint(clientSlot)
+	maskName := "m_bSpottedByMask.0000"
 
-	var mask st.Property
-
-	if bit < 32 {
-		mask = pawnEntity.Property("m_bSpottedByMask.0000")
-	} else {
+	if bit >= 32 {
 		bit -= 32
-		mask = pawnEntity.Property("m_bSpottedByMask.0001")
+		maskName = "m_bSpottedByMask.0001"
 	}
 
-	return (mask.Value().UInt64() & (1 << bit)) != 0
+	return (st.ValueOrZero(pawnEntity, maskName).UInt64() & (1 << bit)) != 0
 }
 
 // HasSpotted returns true if the player has spotted the other player.
@@ -263,8 +263,8 @@ func (p *Player) IsDuckingInProgress() bool {
 		return false
 	}
 
-	duckAmount := pawnEntity.PropertyValueMust("m_pMovementServices.m_flDuckAmount").Float()
-	wantToDuck := pawnEntity.PropertyValueMust("m_pMovementServices.m_bDesiresDuck").BoolVal()
+	duckAmount := st.ValueOrZero(pawnEntity, "m_pMovementServices.m_flDuckAmount").Float()
+	wantToDuck := st.ValueOrZero(pawnEntity, "m_pMovementServices.m_bDesiresDuck").BoolVal()
 
 	return !p.Flags().Ducking() && wantToDuck && duckAmount > 0
 }
@@ -277,8 +277,8 @@ func (p *Player) IsUnDuckingInProgress() bool {
 		return false
 	}
 
-	duckAmount := pawnEntity.PropertyValueMust("m_pMovementServices.m_flDuckAmount").Float()
-	wantToDuck := pawnEntity.PropertyValueMust("m_pMovementServices.m_bDesiresDuck").BoolVal()
+	duckAmount := st.ValueOrZero(pawnEntity, "m_pMovementServices.m_flDuckAmount").Float()
+	wantToDuck := st.ValueOrZero(pawnEntity, "m_pMovementServices.m_bDesiresDuck").BoolVal()
 
 	return !p.Flags().Ducking() && !wantToDuck && duckAmount > 0
 }
@@ -312,7 +312,7 @@ func (p *Player) ControlledBot() *Player {
 		return nil
 	}
 
-	controllerHandler := p.Entity.Property("m_hOriginalControllerOfCurrentPawn").Value().UInt64()
+	controllerHandler := st.ValueOrZero(p.Entity, "m_hOriginalControllerOfCurrentPawn").Handle()
 
 	return p.demoInfoProvider.FindPlayerByHandle(controllerHandler)
 }
@@ -392,7 +392,7 @@ func (p *Player) EquipmentValueFreezeTimeEnd() int {
 // ViewDirectionX returns the Yaw value in degrees, 0 to 360.
 func (p *Player) ViewDirectionX() float32 {
 	if pawnEntity := p.PlayerPawnEntity(); pawnEntity != nil {
-		return float32(pawnEntity.PropertyValueMust("m_angEyeAngles").R3Vec().Y)
+		return float32(st.ValueOrZero(pawnEntity, "m_angEyeAngles").R3Vec().Y)
 	}
 
 	return 0
@@ -401,7 +401,7 @@ func (p *Player) ViewDirectionX() float32 {
 // ViewDirectionY returns the Pitch value in degrees, 270 to 90 (270=-90).
 func (p *Player) ViewDirectionY() float32 {
 	if pawnEntity := p.PlayerPawnEntity(); pawnEntity != nil {
-		return float32(pawnEntity.PropertyValueMust("m_angEyeAngles").R3Vec().X)
+		return float32(st.ValueOrZero(pawnEntity, "m_angEyeAngles").R3Vec().X)
 	}
 
 	return 0
@@ -575,7 +575,7 @@ func (p *Player) ColorOrErr() (Color, error) {
 		return 0, ErrDataNotAvailable
 	}
 
-	return Color(p.Entity.PropertyValueMust("m_iCompTeammateColor").Int()), nil
+	return Color(st.ValueOrZero(p.Entity, "m_iCompTeammateColor").Int()), nil
 }
 
 // Kills returns the amount of kills the player has as shown on the scoreboard.
@@ -600,7 +600,7 @@ func (p *Player) MVPs() int {
 
 // TotalDamage returns the total health damage done by the player.
 func (p *Player) TotalDamage() int {
-	value := p.Entity.PropertyValueMust("m_pActionTrackingServices.m_iDamage")
+	value := st.ValueOrZero(p.Entity, "m_pActionTrackingServices.m_iDamage")
 	if value.Any == nil {
 		return 0
 	}
@@ -610,7 +610,7 @@ func (p *Player) TotalDamage() int {
 
 // UtilityDamage returns the total damage done by the player with grenades.
 func (p *Player) UtilityDamage() int {
-	value := p.Entity.PropertyValueMust("m_pActionTrackingServices.m_iUtilityDamage")
+	value := st.ValueOrZero(p.Entity, "m_pActionTrackingServices.m_iUtilityDamage")
 	if value.Any == nil {
 		return 0
 	}

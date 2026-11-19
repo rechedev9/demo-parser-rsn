@@ -6,8 +6,8 @@ import (
 	_ "embed"
 	"time"
 
-	st "github.com/markus-wa/demoinfocs-golang/v5/pkg/demoinfocs/sendtables"
 	dp "github.com/markus-wa/godispatch"
+	st "github.com/rechedev9/demo-parser-rsn/pkg/demoinfocs/sendtables"
 )
 
 // Parser is an auto-generated interface for Parser, intended to be used when mockability is needed.

@@ -7,11 +7,11 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 
-	common "github.com/markus-wa/demoinfocs-golang/v5/pkg/demoinfocs/common"
-	"github.com/markus-wa/demoinfocs-golang/v5/pkg/demoinfocs/constants"
-	events "github.com/markus-wa/demoinfocs-golang/v5/pkg/demoinfocs/events"
-	st "github.com/markus-wa/demoinfocs-golang/v5/pkg/demoinfocs/sendtables"
-	stfake "github.com/markus-wa/demoinfocs-golang/v5/pkg/demoinfocs/sendtables/fake"
+	common "github.com/rechedev9/demo-parser-rsn/pkg/demoinfocs/common"
+	"github.com/rechedev9/demo-parser-rsn/pkg/demoinfocs/constants"
+	events "github.com/rechedev9/demo-parser-rsn/pkg/demoinfocs/events"
+	st "github.com/rechedev9/demo-parser-rsn/pkg/demoinfocs/sendtables"
+	stfake "github.com/rechedev9/demo-parser-rsn/pkg/demoinfocs/sendtables/fake"
 )
 
 type DevNullReader struct {
@@ -131,11 +131,11 @@ func TestBombStartedArming_ControllerPawnMismatch(t *testing.T) {
 	p.bombsiteB = bombsite{center: r3.Vector{X: 100}}
 
 	bombEntity := new(stfake.Entity)
-	bombEntity.On("PropertyValueMust", "m_hOwnerEntity").Return(st.PropertyValue{Any: uint64(10)})
+	bombEntity.On("PropertyValue", "m_hOwnerEntity").Return(st.PropertyValue{Any: uint64(10)}, true)
 
 	pawnEntity := new(stfake.Entity)
-	pawnEntity.On("PropertyValueMust", "m_hController").Return(st.PropertyValue{Any: uint64(20)})
-	pawnEntity.On("PropertyValueMust", "m_nWhichBombZone").Return(st.PropertyValue{Any: int32(0)})
+	pawnEntity.On("PropertyValue", "m_hController").Return(st.PropertyValue{Any: uint64(20)}, true)
+	pawnEntity.On("PropertyValue", "m_nWhichBombZone").Return(st.PropertyValue{Any: int32(0)}, true)
 	pawnEntity.On("Position").Return(r3.Vector{X: 90})
 	p.gameState.entities[10] = pawnEntity
 
@@ -154,4 +154,26 @@ func TestBombStartedArming_ControllerPawnMismatch(t *testing.T) {
 	assert.True(t, planter.IsPlanting)
 	assert.Same(t, planter, begin.Player)
 	assert.Equal(t, events.BombsiteB, begin.Site)
+}
+
+func TestBindNewPlayerPawn_ControllerNotKnownYet(t *testing.T) {
+	p := newParser()
+
+	var onController st.PropertyUpdateHandler
+	ctlProp := new(stfake.Property)
+	ctlProp.On("OnUpdate", mock.Anything).Run(func(args mock.Arguments) {
+		onController = args.Get(0).(st.PropertyUpdateHandler)
+	})
+	otherProp := new(stfake.Property)
+	otherProp.On("OnUpdate", mock.Anything).Return()
+
+	pawn := new(stfake.Entity)
+	pawn.On("Property", "m_hController").Return(ctlProp)
+	pawn.On("Property", mock.Anything).Return(otherProp)
+
+	p.bindNewPlayerPawn(pawn)
+
+	assert.NotNil(t, onController)
+	assert.NotPanics(t, func() { onController(st.PropertyValue{Any: uint64(5)}) })
+	assert.Empty(t, p.gameState.playersByEntityID)
 }

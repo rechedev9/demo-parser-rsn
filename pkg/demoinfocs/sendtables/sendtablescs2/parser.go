@@ -7,9 +7,9 @@ import (
 
 	"google.golang.org/protobuf/proto"
 
-	bit "github.com/markus-wa/demoinfocs-golang/v5/internal/bitread"
-	"github.com/markus-wa/demoinfocs-golang/v5/pkg/demoinfocs/msg"
-	st "github.com/markus-wa/demoinfocs-golang/v5/pkg/demoinfocs/sendtables"
+	bit "github.com/rechedev9/demo-parser-rsn/internal/bitread"
+	"github.com/rechedev9/demo-parser-rsn/pkg/demoinfocs/msg"
+	st "github.com/rechedev9/demo-parser-rsn/pkg/demoinfocs/sendtables"
 )
 
 /*
@@ -132,11 +132,11 @@ func (p *Parser) OnDemoClassInfo(m *msg.CDemoClassInfo) error {
 		networkName := c.GetNetworkName()
 
 		class := &class{
-			classId:    classId,
-			name:       networkName,
-			serializer: p.serializers[networkName],
-			fpNameCache:  &fpNameTreeCache{},
-			fpFlatCache:  make(map[uint64]string),
+			classId:     classId,
+			name:        networkName,
+			serializer:  p.serializers[networkName],
+			fpNameCache: &fpNameTreeCache{},
+			fpFlatCache: make(map[uint64]string),
 		}
 		p.classesById[class.classId] = class
 		p.classesByName[class.name] = class

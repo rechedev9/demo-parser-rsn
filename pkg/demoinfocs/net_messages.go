@@ -5,12 +5,12 @@ import (
 	"encoding/binary"
 	"fmt"
 
-	bit "github.com/markus-wa/demoinfocs-golang/v5/internal/bitread"
-	events "github.com/markus-wa/demoinfocs-golang/v5/pkg/demoinfocs/events"
-	"github.com/markus-wa/demoinfocs-golang/v5/pkg/demoinfocs/msg"
-	"github.com/markus-wa/demoinfocs-golang/v5/pkg/demoinfocs/sendtables"
 	"github.com/markus-wa/go-unassert"
 	"github.com/markus-wa/ice-cipher-go/pkg/ice"
+	bit "github.com/rechedev9/demo-parser-rsn/internal/bitread"
+	events "github.com/rechedev9/demo-parser-rsn/pkg/demoinfocs/events"
+	"github.com/rechedev9/demo-parser-rsn/pkg/demoinfocs/msg"
+	"github.com/rechedev9/demo-parser-rsn/pkg/demoinfocs/sendtables"
 	"google.golang.org/protobuf/proto"
 )
 

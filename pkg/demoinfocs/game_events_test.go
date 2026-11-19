@@ -7,11 +7,11 @@ import (
 	"github.com/stretchr/testify/assert"
 	"google.golang.org/protobuf/proto"
 
-	common "github.com/markus-wa/demoinfocs-golang/v5/pkg/demoinfocs/common"
-	events "github.com/markus-wa/demoinfocs-golang/v5/pkg/demoinfocs/events"
-	msg "github.com/markus-wa/demoinfocs-golang/v5/pkg/demoinfocs/msg"
-	st "github.com/markus-wa/demoinfocs-golang/v5/pkg/demoinfocs/sendtables"
-	stfake "github.com/markus-wa/demoinfocs-golang/v5/pkg/demoinfocs/sendtables/fake"
+	common "github.com/rechedev9/demo-parser-rsn/pkg/demoinfocs/common"
+	events "github.com/rechedev9/demo-parser-rsn/pkg/demoinfocs/events"
+	msg "github.com/rechedev9/demo-parser-rsn/pkg/demoinfocs/msg"
+	st "github.com/rechedev9/demo-parser-rsn/pkg/demoinfocs/sendtables"
+	stfake "github.com/rechedev9/demo-parser-rsn/pkg/demoinfocs/sendtables/fake"
 )
 
 // See #90
@@ -385,4 +385,28 @@ func TestGetCommunityId_Error(t *testing.T) {
 	_, err := guidToSteamID64("STEAM_0:1:abc")
 	assert.NotNil(t, err)
 	assert.Equal(t, "strconv.ParseUint: parsing \"abc\": invalid syntax", err.Error())
+}
+
+func TestHandleGameEvent_UnknownEventIDIsSkipped(t *testing.T) {
+	p := newParser()
+	p.gameEventDescs = map[int32]*msg.CMsgSource1LegacyGameEventListDescriptorT{}
+
+	var warns []events.ParserWarn
+	p.RegisterEventHandler(func(e events.ParserWarn) { warns = append(warns, e) })
+
+	assert.NotPanics(t, func() { p.handleGameEvent(&msg.CMsgSource1LegacyGameEvent{Eventid: proto.Int32(999)}) })
+	assert.Len(t, warns, 1)
+}
+
+func TestMapGameEventData_EventWithFewerKeysThanItsDescriptor(t *testing.T) {
+	desc := &msg.CMsgSource1LegacyGameEventListDescriptorT{Keys: []*msg.CMsgSource1LegacyGameEventListKeyT{
+		{Name: proto.String("userid")},
+		{Name: proto.String("weapon")},
+	}}
+	ge := &msg.CMsgSource1LegacyGameEvent{Keys: []*msg.CMsgSource1LegacyGameEventKeyT{{ValShort: proto.Int32(3)}}}
+
+	var data map[string]*msg.CMsgSource1LegacyGameEventKeyT
+	assert.NotPanics(t, func() { data = mapGameEventData(desc, ge) })
+	assert.Equal(t, int32(3), data["userid"].GetValShort())
+	assert.Empty(t, data["weapon"].GetValString())
 }

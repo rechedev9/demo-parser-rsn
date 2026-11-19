@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/markus-wa/demoinfocs-golang/v5/pkg/demoinfocs/msg"
 	"github.com/pkg/errors"
+	"github.com/rechedev9/demo-parser-rsn/pkg/demoinfocs/msg"
 	"google.golang.org/protobuf/proto"
 )
 

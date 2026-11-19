@@ -10,10 +10,10 @@ import (
 	heatmap "github.com/markus-wa/go-heatmap/v2"
 	schemes "github.com/markus-wa/go-heatmap/v2/schemes"
 
-	ex "github.com/markus-wa/demoinfocs-golang/v5/examples"
-	demoinfocs "github.com/markus-wa/demoinfocs-golang/v5/pkg/demoinfocs"
-	events "github.com/markus-wa/demoinfocs-golang/v5/pkg/demoinfocs/events"
-	msg "github.com/markus-wa/demoinfocs-golang/v5/pkg/demoinfocs/msg"
+	ex "github.com/rechedev9/demo-parser-rsn/examples"
+	demoinfocs "github.com/rechedev9/demo-parser-rsn/pkg/demoinfocs"
+	events "github.com/rechedev9/demo-parser-rsn/pkg/demoinfocs/events"
+	msg "github.com/rechedev9/demo-parser-rsn/pkg/demoinfocs/msg"
 )
 
 const (

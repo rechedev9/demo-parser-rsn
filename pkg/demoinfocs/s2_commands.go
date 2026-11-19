@@ -10,9 +10,9 @@ import (
 	"github.com/pkg/errors"
 	"google.golang.org/protobuf/proto"
 
-	"github.com/markus-wa/demoinfocs-golang/v5/internal/bitread"
-	"github.com/markus-wa/demoinfocs-golang/v5/pkg/demoinfocs/events"
-	"github.com/markus-wa/demoinfocs-golang/v5/pkg/demoinfocs/msg"
+	"github.com/rechedev9/demo-parser-rsn/internal/bitread"
+	"github.com/rechedev9/demo-parser-rsn/pkg/demoinfocs/events"
+	"github.com/rechedev9/demo-parser-rsn/pkg/demoinfocs/msg"
 )
 
 func (p *parser) handleSendTables(msg *msg.CDemoSendTables) {
@@ -381,9 +381,9 @@ func (p *parser) handleFullPacket(msg *msg.CDemoFullPacket) {
 }
 
 func (p *parser) handleFileInfo(msg *msg.CDemoFileInfo) {
-	p.header.PlaybackTicks = int(*msg.PlaybackTicks)
-	p.header.PlaybackFrames = int(*msg.PlaybackFrames)
-	p.header.PlaybackTime = time.Duration(*msg.PlaybackTime) * time.Second
+	p.header.PlaybackTicks = int(msg.GetPlaybackTicks())
+	p.header.PlaybackFrames = int(msg.GetPlaybackFrames())
+	p.header.PlaybackTime = time.Duration(msg.GetPlaybackTime()) * time.Second
 }
 
 //go:embed event-list-dump/*.bin

@@ -7,8 +7,8 @@ import (
 	"github.com/golang/geo/r3"
 	"github.com/stretchr/testify/assert"
 
-	"github.com/markus-wa/demoinfocs-golang/v5/pkg/demoinfocs/constants"
-	st "github.com/markus-wa/demoinfocs-golang/v5/pkg/demoinfocs/sendtables"
+	"github.com/rechedev9/demo-parser-rsn/pkg/demoinfocs/constants"
+	st "github.com/rechedev9/demo-parser-rsn/pkg/demoinfocs/sendtables"
 )
 
 func TestPlayerActiveWeapon(t *testing.T) {
@@ -574,4 +574,16 @@ func playerWithPawnPositionAndProperties(pos r3.Vector, props []fakeProp) *Playe
 			},
 		},
 	}
+}
+
+func TestPlayerWithoutPawnReadsZero(t *testing.T) {
+	pl := playerWithProperty("m_hPawn", st.PropertyValue{Any: uint64(constants.InvalidEntityHandleSource2)})
+
+	assert.Nil(t, pl.PlayerPawnEntity())
+	assert.NotPanics(t, func() {
+		assert.Equal(t, TeamUnassigned, pl.GetTeam())
+		assert.Zero(t, pl.GetFlashDuration())
+		assert.False(t, pl.IsSpottedBy(nil))
+		assert.False(t, newPlayer(0).IsSpottedBy(pl))
+	})
 }

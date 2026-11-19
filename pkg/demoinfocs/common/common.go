@@ -10,7 +10,7 @@ import (
 
 	"github.com/golang/geo/r3"
 
-	st "github.com/markus-wa/demoinfocs-golang/v5/pkg/demoinfocs/sendtables"
+	st "github.com/rechedev9/demo-parser-rsn/pkg/demoinfocs/sendtables"
 )
 
 // Team is the type for the various TeamXYZ constants.
@@ -45,7 +45,7 @@ func (g *GrenadeProjectile) Position() r3.Vector {
 
 // Velocity returns the projectile's velocity.
 func (g *GrenadeProjectile) Velocity() r3.Vector {
-	return g.Entity.PropertyValueMust("m_vecVelocity").R3Vec()
+	return st.ValueOrZero(g.Entity, "m_vecVelocity").R3Vec()
 }
 
 // UniqueID returns the unique id of the grenade.

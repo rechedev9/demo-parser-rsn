@@ -3,7 +3,7 @@ package sendtablescs2
 import (
 	"testing"
 
-	st "github.com/markus-wa/demoinfocs-golang/v5/pkg/demoinfocs/sendtables"
+	st "github.com/rechedev9/demo-parser-rsn/pkg/demoinfocs/sendtables"
 	"github.com/stretchr/testify/assert"
 )
 

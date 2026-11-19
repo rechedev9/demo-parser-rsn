@@ -7,9 +7,9 @@ import (
 	"strings"
 
 	"github.com/golang/geo/r3"
-	"github.com/markus-wa/demoinfocs-golang/v5/pkg/demoinfocs/constants"
-	"github.com/markus-wa/demoinfocs-golang/v5/pkg/demoinfocs/msg"
-	st "github.com/markus-wa/demoinfocs-golang/v5/pkg/demoinfocs/sendtables"
+	"github.com/rechedev9/demo-parser-rsn/pkg/demoinfocs/constants"
+	"github.com/rechedev9/demo-parser-rsn/pkg/demoinfocs/msg"
+	st "github.com/rechedev9/demo-parser-rsn/pkg/demoinfocs/sendtables"
 	"golang.org/x/exp/maps"
 )
 
@@ -163,8 +163,11 @@ func (e *Entity) Property(name string) st.Property {
 	return e.propCache[name]
 }
 
+// BindProperty does nothing when the class has no such property, as in older or POV demos.
 func (e *Entity) BindProperty(prop string, variable any, t st.PropertyValueType) {
-	e.Property(prop).Bind(variable, t)
+	if p := e.Property(prop); p != nil {
+		p.Bind(variable, t)
+	}
 }
 
 func (e *Entity) PropertyValue(name string) (st.PropertyValue, bool) {
@@ -208,12 +211,12 @@ func coordFromCell(cell uint64, offset float32) float64 {
 }
 
 func (e *Entity) Position() r3.Vector {
-	cellXVal := e.Property(propCellX).Value()
-	cellYVal := e.Property(propCellY).Value()
-	cellZVal := e.Property(propCellZ).Value()
-	offsetXVal := e.Property(propVecX).Value()
-	offsetYVal := e.Property(propVecY).Value()
-	offsetZVal := e.Property(propVecZ).Value()
+	cellXVal, _ := e.PropertyValue(propCellX)
+	cellYVal, _ := e.PropertyValue(propCellY)
+	cellZVal, _ := e.PropertyValue(propCellZ)
+	offsetXVal, _ := e.PropertyValue(propVecX)
+	offsetYVal, _ := e.PropertyValue(propVecY)
+	offsetZVal, _ := e.PropertyValue(propVecZ)
 
 	if cellXVal.Any == nil || cellYVal.Any == nil || cellZVal.Any == nil || offsetXVal.Any == nil || offsetYVal.Any == nil || offsetZVal.Any == nil {
 		return r3.Vector{} // CS2 POV demos
@@ -243,12 +246,11 @@ func (e *Entity) OnPositionUpdate(h func(pos r3.Vector)) {
 		}
 	}
 
-	e.Property(propCellX).OnUpdate(firePosUpdate)
-	e.Property(propCellY).OnUpdate(firePosUpdate)
-	e.Property(propCellZ).OnUpdate(firePosUpdate)
-	e.Property(propVecX).OnUpdate(firePosUpdate)
-	e.Property(propVecY).OnUpdate(firePosUpdate)
-	e.Property(propVecZ).OnUpdate(firePosUpdate)
+	for _, name := range []string{propCellX, propCellY, propCellZ, propVecX, propVecY, propVecZ} {
+		if prop := e.Property(name); prop != nil {
+			prop.OnUpdate(firePosUpdate)
+		}
+	}
 }
 
 func (e *Entity) OnDestroy(delegate func()) {

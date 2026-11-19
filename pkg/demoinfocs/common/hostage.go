@@ -3,8 +3,8 @@ package common
 import (
 	"github.com/golang/geo/r3"
 
-	"github.com/markus-wa/demoinfocs-golang/v5/pkg/demoinfocs/constants"
-	st "github.com/markus-wa/demoinfocs-golang/v5/pkg/demoinfocs/sendtables"
+	"github.com/rechedev9/demo-parser-rsn/pkg/demoinfocs/constants"
+	st "github.com/rechedev9/demo-parser-rsn/pkg/demoinfocs/sendtables"
 )
 
 // HostageState is the type for the various HostageStateXYZ constants.
@@ -59,7 +59,7 @@ func (hostage *Hostage) Leader() *Player {
 		return hostage.demoInfoProvider.FindPlayerByPawnHandle(leaderHandle)
 	}
 
-	return hostage.demoInfoProvider.FindPlayerByPawnHandle(getUInt64(hostage.Entity, "m_hHostageGrabber"))
+	return hostage.demoInfoProvider.FindPlayerByPawnHandle(st.ValueOrZero(hostage.Entity, "m_hHostageGrabber").Handle())
 }
 
 // NewHostage creates a hostage.

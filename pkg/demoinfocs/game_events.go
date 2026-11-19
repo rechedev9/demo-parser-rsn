@@ -10,9 +10,9 @@ import (
 	"github.com/pkg/errors"
 	"google.golang.org/protobuf/proto"
 
-	common "github.com/markus-wa/demoinfocs-golang/v5/pkg/demoinfocs/common"
-	events "github.com/markus-wa/demoinfocs-golang/v5/pkg/demoinfocs/events"
-	msg "github.com/markus-wa/demoinfocs-golang/v5/pkg/demoinfocs/msg"
+	common "github.com/rechedev9/demo-parser-rsn/pkg/demoinfocs/common"
+	events "github.com/rechedev9/demo-parser-rsn/pkg/demoinfocs/events"
+	msg "github.com/rechedev9/demo-parser-rsn/pkg/demoinfocs/msg"
 )
 
 func (p *parser) handleGameEventList(gel *msg.CMsgSource1LegacyGameEventList) {
@@ -42,6 +42,12 @@ func (p *parser) handleGameEvent(ge *msg.CMsgSource1LegacyGameEvent) {
 	}
 
 	desc := p.gameEventDescs[ge.GetEventid()]
+	if desc == nil {
+		// A CS2 build newer than the event list in the demo (or the embedded fallback) can send unknown ids.
+		p.eventDispatcher.Dispatch(events.ParserWarn{Message: fmt.Sprintf("game event id %d has no descriptor", ge.GetEventid())})
+
+		return
+	}
 
 	debugGameEvent(desc, ge)
 
@@ -1098,7 +1104,12 @@ func getPlayerWeapon(player *common.Player, wepType common.EquipmentType) *commo
 
 func mapGameEventData(d *msg.CMsgSource1LegacyGameEventListDescriptorT, e *msg.CMsgSource1LegacyGameEvent) map[string]*msg.CMsgSource1LegacyGameEventKeyT {
 	data := make(map[string]*msg.CMsgSource1LegacyGameEventKeyT, len(d.Keys))
+	// An event with fewer keys than its descriptor leaves the missing keys absent; their getters read zero.
 	for i, k := range d.Keys {
+		if i >= len(e.Keys) {
+			break
+		}
+
 		data[k.GetName()] = e.Keys[i]
 	}
 

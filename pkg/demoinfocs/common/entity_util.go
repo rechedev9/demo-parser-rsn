@@ -1,13 +1,13 @@
 package common
 
-import st "github.com/markus-wa/demoinfocs-golang/v5/pkg/demoinfocs/sendtables"
+import st "github.com/rechedev9/demo-parser-rsn/pkg/demoinfocs/sendtables"
 
 func getInt(entity st.Entity, propName string) int {
 	if entity == nil {
 		return 0
 	}
 
-	return entity.PropertyValueMust(propName).Int()
+	return st.ValueOrZero(entity, propName).Int()
 }
 
 func getUInt64(entity st.Entity, propName string) uint64 {
@@ -15,7 +15,7 @@ func getUInt64(entity st.Entity, propName string) uint64 {
 		return 0
 	}
 
-	return entity.PropertyValueMust(propName).UInt64()
+	return st.ValueOrZero(entity, propName).UInt64()
 }
 
 func getFloat(entity st.Entity, propName string) float32 {
@@ -23,7 +23,7 @@ func getFloat(entity st.Entity, propName string) float32 {
 		return 0
 	}
 
-	return entity.PropertyValueMust(propName).Float()
+	return st.ValueOrZero(entity, propName).Float()
 }
 
 func getFloatIfExists(entity st.Entity, propName string) (float32, bool) {
@@ -49,7 +49,7 @@ func getString(entity st.Entity, propName string) string {
 		return ""
 	}
 
-	return entity.PropertyValueMust(propName).String()
+	return st.ValueOrZero(entity, propName).String()
 }
 
 func getBool(entity st.Entity, propName string) bool {
@@ -57,5 +57,5 @@ func getBool(entity st.Entity, propName string) bool {
 		return false
 	}
 
-	return entity.PropertyValueMust(propName).BoolVal()
+	return st.ValueOrZero(entity, propName).BoolVal()
 }

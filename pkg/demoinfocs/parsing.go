@@ -11,10 +11,10 @@ import (
 	"github.com/pkg/errors"
 	"google.golang.org/protobuf/proto"
 
-	"github.com/markus-wa/demoinfocs-golang/v5/pkg/demoinfocs/msg"
-	"github.com/markus-wa/demoinfocs-golang/v5/pkg/demoinfocs/sendtables/sendtablescs2"
+	"github.com/rechedev9/demo-parser-rsn/pkg/demoinfocs/msg"
+	"github.com/rechedev9/demo-parser-rsn/pkg/demoinfocs/sendtables/sendtablescs2"
 
-	"github.com/markus-wa/demoinfocs-golang/v5/pkg/demoinfocs/events"
+	"github.com/rechedev9/demo-parser-rsn/pkg/demoinfocs/events"
 )
 
 const (

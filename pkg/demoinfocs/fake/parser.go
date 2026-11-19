@@ -9,8 +9,8 @@ import (
 	mock "github.com/stretchr/testify/mock"
 	"golang.org/x/exp/constraints"
 
-	demoinfocs "github.com/markus-wa/demoinfocs-golang/v5/pkg/demoinfocs"
-	st "github.com/markus-wa/demoinfocs-golang/v5/pkg/demoinfocs/sendtables"
+	demoinfocs "github.com/rechedev9/demo-parser-rsn/pkg/demoinfocs"
+	st "github.com/rechedev9/demo-parser-rsn/pkg/demoinfocs/sendtables"
 )
 
 var _ demoinfocs.Parser = new(Parser)
