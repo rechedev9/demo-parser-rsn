@@ -657,6 +657,27 @@ func (p *parser) bindWeapons() {
 	p.stParser.ServerClasses().FindByName("CInferno").OnEntityCreated(p.bindNewInferno)
 }
 
+func equipmentTypeFromProjectile(entity st.Entity) common.EquipmentType {
+	switch entity.ServerClass().Name() {
+	case "CFlashbangProjectile":
+		return common.EqFlash
+	case "CHEGrenadeProjectile":
+		return common.EqHE
+	case "CSmokeGrenadeProjectile":
+		return common.EqSmoke
+	case "CDecoyProjectile":
+		return common.EqDecoy
+	case "CMolotovProjectile":
+		if st.ValueOrZero(entity, "m_bIsIncGrenade").BoolVal() {
+			return common.EqIncendiary
+		}
+
+		return common.EqMolotov
+	}
+
+	return common.EqUnknown
+}
+
 // bindGrenadeProjectiles keeps track of the location of live grenades (parser.gameState.grenadeProjectiles), actively thrown by players.
 // It does NOT track the location of grenades lying on the ground, i.e. that were dropped by dead players.
 func (p *parser) bindGrenadeProjectiles(entity st.Entity) {
@@ -677,13 +698,18 @@ func (p *parser) bindGrenadeProjectiles(entity st.Entity) {
 	entity.OnCreateFinished(func() { //nolint:wsl
 		modelVal := st.ValueOrZero(entity, "CBodyComponent.m_hModel")
 
-		if modelVal.Any != nil {
-			model := modelVal.UInt64()
-			weaponType, exists := p.equipmentTypePerModel[model]
-			if exists {
-				wep = weaponType
-			} else {
-				fmt.Fprintf(os.Stderr, "unknown grenade model %d\n", model)
+		model := modelVal.UInt64()
+		if weaponType, exists := p.equipmentTypePerModel[model]; exists && model != 0 {
+			wep = weaponType
+		} else {
+			// equipmentTypePerModel is learned from weapon entities, so a projectile in the first
+			// snapshot of a demo can come before its weapon, or before its model is set (model 0).
+			wep = equipmentTypeFromProjectile(entity)
+			if wep == common.EqUnknown {
+				p.eventDispatcher.Dispatch(events.ParserWarn{
+					Message: fmt.Sprintf("unknown grenade model %d in projectile class %s", model, entity.ServerClass().Name()),
+					Type:    events.WarnTypeUnknownGrenadeModel,
+				})
 			}
 		}
 

@@ -607,6 +607,9 @@ const (
 	// May occur because the decryption key used is incorrect.
 	// See ParserConfig.NetMessageDecryptionKey
 	WarnTypeCantReadEncryptedNetMessage
+
+	// WarnTypeUnknownGrenadeModel occurs when neither the model nor the class of a grenade projectile tells its type.
+	WarnTypeUnknownGrenadeModel
 )
 
 // WarnTypeUnknownDemoCommandMessageType occurs when a demo-command message type is unknown - contact a maintainer.

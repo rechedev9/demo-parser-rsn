@@ -105,5 +105,5 @@ func (e *Entity) Destroy() {
 
 // OnCreateFinished is a mock-implementation of Entity.OnCreateFinished().
 func (e *Entity) OnCreateFinished(delegate func()) {
-	e.Called()
+	e.Called(delegate)
 }
